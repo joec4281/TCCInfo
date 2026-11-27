@@ -44,6 +44,9 @@ Gosub FontName
 iff exist %@name[%_batchname.ps1] pshell %_batchname:%@name[%_batchname].ps1
 echo.
 :: https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/post-78289
+::
+:: 2026/11/26 - Added work-around for Windows 11 not having the wmic.exe command.
+:: PowerShell workaround from knudvaneeden 
 :: if exist %@search[wmic.exe] wmic os get caption, buildnumber, version, csdversion, OSArchitecture
 pshell /s "Get-CimInstance -ClassName Win32_OperatingSystem | Format-Table -Property Caption,BuildNumber,Version,CSDVersion,OSArchitecture"
 echo ^nFeature Update Release: %@regquery["HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DisplayVersion"]
