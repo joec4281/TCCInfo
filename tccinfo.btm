@@ -10,10 +10,18 @@
 ::    the TCCInfo.btm file that is on GitHub.
 ::   The output can be re-directed to a file, 
 ::    so as to update your current TCCInfo.btm.
-::   Example: TCCInfo.btm git > TCCInfo.btm
+::   Examples: TCCInfo.btm git | view
+::           : TCCInfo.btm git > tmp9: 
+::
+::  Added NoClobber to creation of PowerShell 5.1 Code
+::   NoClobber suggestion from MGibs
+::   https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/post-78295
+::
 :: Version 2026.11.26
 ::  Added work-around for Windows 11 not having the wmic.exe command.
 ::  PowerShell workaround from knudvaneeden 
+::  https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/post-78287
+
 if isdir r:\temp set temp=r:\temp
 
 iff %1 eq git then
@@ -79,7 +87,7 @@ ENDLOCAL
 quit
 
 :FontName
-type <<- endtext > %_batchname:%@name[%_batchname].ps1
+type <<- endtext >! %_batchname:%@name[%_batchname].ps1
 if (-not ('Win32test.ConsoleTest' -as [type])) {
     $defConsoleTest = @'
 using System.Runtime.InteropServices;
