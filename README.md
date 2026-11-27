@@ -25,9 +25,10 @@ the first reply is usually...
 
 ..etc.
 
-Here's the beginnings of **tccinfo.btm**
+View **tccinfo.btm**,    
+and then run **tccinfo.btm**,
 from which you can capture the output,
 and paste into your message with your support question.   
-  
+
  
   
