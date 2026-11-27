@@ -1,10 +1,25 @@
 @SETLOCAL
 @ECHO OFF
 :: TCCInfo.btm
-:: Version 2026.11.26
 :: https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/
-
+::
+:: Version 2026.11.27
+::  Added the git argument to TCCInfo.btm
+::   This will display, 
+::    from the TCC Console, 
+::    the TCCInfo.btm file that is on GitHub.
+::   The output can be re-directed to a file, 
+::    so as to update your current TCCInfo.btm.
+::   Example: TCCInfo.btm git > TCCInfo.btm
+:: Version 2026.11.26
+::  Added work-around for Windows 11 not having the wmic.exe command.
+::  PowerShell workaround from knudvaneeden 
 if isdir r:\temp set temp=r:\temp
+
+iff %1 eq git then
+  type https://raw.githubusercontent.com/joec4281/TCCInfo/refs/heads/main/tccinfo.btm
+  quit 
+endiff
 
 echo    _admin: %_admin %@char[9] %{which _admin}
 echo _elevated: %_elevated %@char[9] %{which _elevated}
