@@ -1,7 +1,7 @@
 @SETLOCAL
 @ECHO OFF
 :: TCCInfo.btm
-:: 2026/11/26
+:: Version 2026.11.26
 :: https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/
 
 if isdir r:\temp set temp=r:\temp
