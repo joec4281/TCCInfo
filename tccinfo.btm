@@ -1,0 +1,148 @@
+@SETLOCAL
+@ECHO OFF
+:: TCCInfo.btm
+:: 2026/11/26
+:: https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/
+
+if isdir r:\temp set temp=r:\temp
+
+echo    _admin: %_admin %@char[9] %{which _admin}
+echo _elevated: %_elevated %@char[9] %{which _elevated}
+echo   _parent: %_parent
+echo   _conpty: %_conpty %@char[9] %{which _conpty}
+echo  _cmdspec: %_cmdspec 
+echo     _ansi: %_ansi
+echo    _tctab: %_tctab %@if[%_tctab eq 1,Running in a TCMD Tab,Not running in a TCMD Tab]
+
+:: start TCC /... to display DEBUG dialog boxes.
+
+:: _contype is from the MyWindows.dll plugin
+:: https://charlesdye.net/plugins/mywindow.html
+iff exist e:\utils\MyWindow.dll then
+  if not plugin MyWindow plugin /l e:\utils\MyWindow.dll
+  if isplugin _contype echo  _contype: %_contype
+endiff
+set WT=N
+if defined WT_PROFILE_ID set WT=Y
+if defined WT_SESSION set WT=Y
+if %WT=Y echo        WT: Windows Terminal
+if %WT=N echo        WT: Not running in Windows Terminal
+ver
+chcp 
+
+:: Font is from the confont.dll plugin
+:: https://charlesdye.net/plugins/confont.html
+iff exist e:\utils\confont.dll then
+  iff %WT ne Y then
+    if not plugin ConFont plugin /l e:\utils\ConFont.dll
+    if isplugin font echo Font: %{font}
+  endiff
+endiff
+
+Gosub FontName
+:: Rex added support for NTFS file streams in Version 36.50 for the PShell Command.
+iff exist %@name[%_batchname.ps1] pshell %_batchname:%@name[%_batchname].ps1
+echo.
+:: https://jpsoft.com/forums/threads/when-asking-a-question-in-the-support-forum.13281/post-78289
+:: if exist %@search[wmic.exe] wmic os get caption, buildnumber, version, csdversion, OSArchitecture
+pshell /s "Get-CimInstance -ClassName Win32_OperatingSystem | Format-Table -Property Caption,BuildNumber,Version,CSDVersion,OSArchitecture"
+echo ^nFeature Update Release: %@regquery["HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DisplayVersion"]
+:: if exist %@search[wmic.exe] wmic computersystem get manufacturer,model
+pshell /s "Get-CimInstance -ClassName Win32_ComputerSystem | Format-Table -Property Manufacturer,Model"
+echo.
+resolution
+
+Gosub INIClean
+
+iff exist %temp\tcmd.ini then
+  echo %temp\tcmd.ini has been cleaned,
+  echo and is ready to be attached to a forum message.
+ENDLOCAL
+quit
+
+:FontName
+type <<- endtext > %_batchname:%@name[%_batchname].ps1
+if (-not ('Win32test.ConsoleTest' -as [type])) {
+    $defConsoleTest = @'
+using System.Runtime.InteropServices;
+using System;
+
+namespace Win32test
+{
+    public static class ConsoleTest
+    {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        extern static bool GetCurrentConsoleFontEx(
+            IntPtr hConsoleOutput,
+            bool bMaximumWindow,
+            ref CONSOLE_FONT_INFOEX lpConsoleCurrentFont);
+
+        private enum StdHandle
+        {
+            OutputHandle = -11
+        }
+
+        [DllImport("kernel32")]
+        private static extern IntPtr GetStdHandle(StdHandle index);
+
+        public static string GetFontInfo()
+        {
+            CONSOLE_FONT_INFOEX ConsoleFontInfo = new CONSOLE_FONT_INFOEX();
+            ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
+
+            GetCurrentConsoleFontEx(GetStdHandle(StdHandle.OutputHandle), false, ref ConsoleFontInfo);
+
+            return string.Format("FaceName: {0}, FontFamily: {1}, FontWeight: {2}, FontSize: {3}x{4}",
+                ConsoleFontInfo.FaceName,
+                ConsoleFontInfo.FontFamily,
+                ConsoleFontInfo.FontWeight,
+                ConsoleFontInfo.dwFontSize.X,
+                ConsoleFontInfo.dwFontSize.Y);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct COORD
+        {
+            public short X;
+            public short Y;
+            public COORD(short x, short y) { X = x; Y = y; }
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct CONSOLE_FONT_INFOEX
+        {
+            public uint cbSize;
+            public uint nFont;
+            public COORD dwFontSize;
+            public int FontFamily;
+            public int FontWeight;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string FaceName;
+        }
+    }
+}
+'@
+    Add-Type -TypeDefinition $defConsoleTest
+}
+
+[Win32test.ConsoleTest]::GetFontInfo()   
+endtext
+return
+
+:INIClean
+iff exist "%_ininame" copy "%_ininame" %temp
+iff not exist "%_ininame" return
+
+pushd
+cdd %temp
+
+rem Remove entries for privacy
+
+iff exist %temp\tcmd.ini then
+  echo Deleting MailAddress: %@iniwrite[%temp\tcmd.ini,4NT,MailAddress,]
+  echo Deleting MailPassword: %@iniwrite[%temp\tcmd.ini,4NT,MailPassword,]
+  echo Deleting MailAddress: %@iniwrite[%temp\tcmd.ini,4NT,MailUser,]
+endiff
+
+popd 
+Return
